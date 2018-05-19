@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+const length_UINT8 = 1
 const length_UINT16 = 2
 const length_UINT32 = 4
 const length_UINT64 = 8
@@ -15,10 +16,32 @@ type DBReader struct {
 	Cursor uint64
 }
 
+func (r *DBReader) readUint8() uint8 {
+	val := uint8(0)
+	buf := bytes.NewBuffer(r.Bytes[r.Cursor : r.Cursor+length_UINT8])
+	err := binary.Read(buf, binary.LittleEndian, &val)
+	if err != nil {
+		log.Fatalf("Decode failed: %s", err)
+	}
+	r.Cursor += length_UINT8
+	return val
+}
+
 func (r *DBReader) readUint16() uint16 {
 	val := uint16(0)
 	buf := bytes.NewBuffer(r.Bytes[r.Cursor : r.Cursor+length_UINT16])
 	err := binary.Read(buf, binary.LittleEndian, &val)
+	if err != nil {
+		log.Fatalf("Decode failed: %s", err)
+	}
+	r.Cursor += length_UINT16
+	return val
+}
+
+func (r *DBReader) readBigEndianUint16() uint16 {
+	val := uint16(0)
+	buf := bytes.NewBuffer(r.Bytes[r.Cursor : r.Cursor+length_UINT16])
+	err := binary.Read(buf, binary.BigEndian, &val)
 	if err != nil {
 		log.Fatalf("Decode failed: %s", err)
 	}
