@@ -47,7 +47,7 @@ func (peersDB BitPeersDB) dump() {
 		var parsedSourceIP net.IP
 		parsedSourceIP = peersDB.NewAddrInfo[i].Source
 		fmt.Printf("Parsed Source IP: %s\n", parsedSourceIP)
-		// fmt.Printf("Version: 0x%s\n", hexstring(peersDB.NewAddrInfo[i].Address.Version))
+
 		fmt.Printf("Time: %d\n", peersDB.NewAddrInfo[i].Address.Time)
 		fmt.Printf("ServiceFlags: 0x%s\n", hexstring(peersDB.NewAddrInfo[i].ServiceFlags))
 		fmt.Printf("UnknownBytes: 0x%s\n", hexstring(peersDB.NewAddrInfo[i].UnknownBytes))
@@ -68,7 +68,7 @@ func (peersDB BitPeersDB) dump() {
 		var parsedSourceIP net.IP
 		parsedSourceIP = peersDB.TriedAddrInfo[i].Source
 		fmt.Printf("Parsed Source IP: %s\n", parsedSourceIP)
-		// fmt.Printf("Version: 0x%s\n", hexstring(peersDB.TriedAddrInfo[i].Address.Version))
+
 		fmt.Printf("Time: %d\n", peersDB.TriedAddrInfo[i].Address.Time)
 		fmt.Printf("ServiceFlags: 0x%s\n", hexstring(peersDB.TriedAddrInfo[i].ServiceFlags))
 		fmt.Printf("UnknownBytes: 0x%s\n", hexstring(peersDB.TriedAddrInfo[i].UnknownBytes))

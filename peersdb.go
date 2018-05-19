@@ -19,19 +19,17 @@ type PeersDB struct {
 }
 
 type CAddrInfo struct {
-	SerializationVersion []byte
-	Source               []byte
-	LastSuccess          uint64
-	ServiceFlags         []byte
-	Address              CAddress
-	Attempts             uint32
-	UnknownBytes         []byte
+	Address     CAddress
+	Source      []byte
+	LastSuccess uint64
+	Attempts    uint32
 }
 
 type CAddress struct {
-	PeerAddress CService
-	Version     []byte
-	Time        uint32
+	SerializationVersion []byte
+	Time                 uint32
+	ServiceFlags         []byte
+	PeerAddress          CService
 }
 
 type CService struct {
@@ -78,7 +76,6 @@ func NewPeersDB(path string) (PeersDB, error) {
 
 		peersDB.NewAddrInfo[i].LastSuccess = dbreader.readUint64()
 		peersDB.NewAddrInfo[i].Attempts = dbreader.readUint32()
-		// peersDB.NewAddrInfo[i].UnknownBytes = append([]byte{0x00, 0x00, 0x00, 0x00}, dbreader.readBytes(4)...)
 	}
 
 	for i = 0; i < peersDB.NTried; i++ {
@@ -93,7 +90,6 @@ func NewPeersDB(path string) (PeersDB, error) {
 
 		peersDB.TriedAddrInfo[i].LastSuccess = dbreader.readUint64()
 		peersDB.TriedAddrInfo[i].Attempts = dbreader.readUint32()
-		// peersDB.TriedAddrInfo[i].UnknownBytes = append([]byte{0x00, 0x00, 0x00, 0x00}, dbreader.readBytes(4)...)
 	}
 
 	return peersDB, nil
