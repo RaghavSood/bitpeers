@@ -2,36 +2,37 @@ package bitpeers
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
 )
 
 type PeersDB struct {
-	Path          string
-	MessageBytes  []byte // 0  : 4
-	Version       uint8  // 4  : 4
-	KeySize       uint8  // 5  : 5
-	NKey          []byte // 37 : 32
-	NNew          uint32 // 41 : 4
-	NTried        uint32 // 45 : 4
-	NewBuckets    uint32 // 49 : 4
-	NewAddrInfo   []CAddrInfo
-	TriedAddrInfo []CAddrInfo
+	Path          string      `json:"-"`
+	MessageBytes  []byte      `json:"message_bytes"` // 0  : 4
+	Version       uint8       `json:"version"`       // 4  : 4
+	KeySize       uint8       `json:"keysize"`       // 5  : 5
+	NKey          []byte      `json:"nkey"`          // 37 : 32
+	NNew          uint32      `json:"nnew"`          // 41 : 4
+	NTried        uint32      `json:"ntried"`        // 45 : 4
+	NewBuckets    uint32      `json:"new_buckets"`   // 49 : 4
+	NewAddrInfo   []CAddrInfo `json:"new_addr_info"`
+	TriedAddrInfo []CAddrInfo `json:"tried_addr_info"`
 }
 
 type CAddrInfo struct {
-	Address     CAddress
-	Source      net.IP
-	LastSuccess uint64
-	Attempts    uint32
+	Address     CAddress `json:"address"`
+	Source      net.IP   `json:"source"`
+	LastSuccess uint64   `json:"last_success"`
+	Attempts    uint32   `json:"attempts"`
 }
 
 type CAddress struct {
-	SerializationVersion []byte
-	Time                 uint32
-	ServiceFlags         []byte
-	PeerAddress          CService
+	SerializationVersion []byte   `json:"serialization_version"`
+	Time                 uint32   `json:"time"`
+	ServiceFlags         []byte   `json:"service_flags"`
+	PeerAddress          CService `json:"ip"`
 }
 
 type CService struct {
@@ -106,6 +107,21 @@ func (cService CService) String() string {
 	return fmt.Sprintf("%s:%d", cService.IPAddress, cService.Port)
 }
 
+func (cAddress *CAddress) MarshalJSON() ([]byte, error) {
+	type Alias CAddress
+	return json.Marshal(&struct {
+		IP                   string `json:"ip"`
+		SerializationVersion string `json:"serialization_version"`
+		ServiceFlags         string `json:"service_flags"`
+		*Alias
+	}{
+		IP:                   cAddress.PeerAddress.String(),
+		SerializationVersion: hexstring(cAddress.SerializationVersion),
+		ServiceFlags:         binaryString(cAddress.ServiceFlags),
+		Alias:                (*Alias)(cAddress),
+	})
+}
+
 func hexstring(input []byte) string {
 	return hex.EncodeToString(input)
 }
@@ -115,4 +131,12 @@ func reverseBytes(input []byte) []byte {
 		input[i], input[j] = input[j], input[i]
 	}
 	return input
+}
+
+func binaryString(input []byte) string {
+	var binaryString string
+	for _, x := range input {
+		binaryString += fmt.Sprintf("%08b", x)
+	}
+	return binaryString
 }
