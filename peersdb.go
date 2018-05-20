@@ -1,8 +1,10 @@
 package bitpeers
 
 import (
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
+	"net"
 )
 
 type PeersDB struct {
@@ -20,7 +22,7 @@ type PeersDB struct {
 
 type CAddrInfo struct {
 	Address     CAddress
-	Source      []byte
+	Source      net.IP
 	LastSuccess uint64
 	Attempts    uint32
 }
@@ -33,7 +35,7 @@ type CAddress struct {
 }
 
 type CService struct {
-	IPAddress []byte
+	IPAddress net.IP
 	Port      uint16 // This is serialized as BigEndian
 }
 
@@ -65,36 +67,52 @@ func NewPeersDB(path string) (PeersDB, error) {
 
 	var i uint32
 	for i = 0; i < peersDB.NNew; i++ {
-
-		peersDB.NewAddrInfo[i].SerializationVersion = dbreader.readBytes(4)
-		peersDB.NewAddrInfo[i].Address.Time = dbreader.readUint32()
-		peersDB.NewAddrInfo[i].ServiceFlags = dbreader.readBytes(8)
-
-		peersDB.NewAddrInfo[i].Address.PeerAddress.IPAddress = dbreader.readBytes(16)
-		peersDB.NewAddrInfo[i].Address.PeerAddress.Port = dbreader.readBigEndianUint16()
-		peersDB.NewAddrInfo[i].Source = dbreader.readBytes(16)
-
-		peersDB.NewAddrInfo[i].LastSuccess = dbreader.readUint64()
-		peersDB.NewAddrInfo[i].Attempts = dbreader.readUint32()
+		peersDB.NewAddrInfo[i] = dbreader.readCAddrInfo()
 	}
 
 	for i = 0; i < peersDB.NTried; i++ {
-
-		peersDB.TriedAddrInfo[i].SerializationVersion = dbreader.readBytes(4)
-		peersDB.TriedAddrInfo[i].Address.Time = dbreader.readUint32()
-		peersDB.TriedAddrInfo[i].ServiceFlags = dbreader.readBytes(8)
-
-		peersDB.TriedAddrInfo[i].Address.PeerAddress.IPAddress = dbreader.readBytes(16)
-		peersDB.TriedAddrInfo[i].Address.PeerAddress.Port = dbreader.readBigEndianUint16()
-		peersDB.TriedAddrInfo[i].Source = dbreader.readBytes(16)
-
-		peersDB.TriedAddrInfo[i].LastSuccess = dbreader.readUint64()
-		peersDB.TriedAddrInfo[i].Attempts = dbreader.readUint32()
+		peersDB.TriedAddrInfo[i] = dbreader.readCAddrInfo()
 	}
 
 	return peersDB, nil
 }
 
+func (dbreader *DBReader) readCAddrInfo() (cAddrInfo CAddrInfo) {
+	cAddrInfo.Address.SerializationVersion = dbreader.readBytes(4)
+	cAddrInfo.Address.Time = dbreader.readUint32()
+	cAddrInfo.Address.ServiceFlags = reverseBytes(dbreader.readBytes(8))
+	cAddrInfo.Address.PeerAddress.IPAddress = dbreader.readBytes(16)
+	cAddrInfo.Address.PeerAddress.Port = dbreader.readBigEndianUint16()
+
+	cAddrInfo.Source = dbreader.readBytes(16)
+	cAddrInfo.LastSuccess = dbreader.readUint64()
+	cAddrInfo.Attempts = dbreader.readUint32()
+	return
+}
+
 func readDBBytes(peersDB PeersDB) ([]byte, error) {
 	return ioutil.ReadFile(peersDB.Path)
+}
+
+func (cAddrInfo CAddrInfo) String() string {
+	return fmt.Sprintf("%s\nSource: %s\nLastSuccess: %d\nAttempts: %d\n\n", cAddrInfo.Address, cAddrInfo.Source, cAddrInfo.LastSuccess, cAddrInfo.Attempts)
+}
+
+func (cAddress CAddress) String() string {
+	return fmt.Sprintf("SerializationVersion: %s\nTime: %d\nServiceFlags: 0x%s\nIP: %s", hexstring(cAddress.SerializationVersion), cAddress.Time, hexstring(cAddress.ServiceFlags), cAddress.PeerAddress)
+}
+
+func (cService CService) String() string {
+	return fmt.Sprintf("%s:%d", cService.IPAddress, cService.Port)
+}
+
+func hexstring(input []byte) string {
+	return hex.EncodeToString(input)
+}
+
+func reverseBytes(input []byte) []byte {
+	for i, j := 0, len(input)-1; i < j; i, j = i+1, j-1 {
+		input[i], input[j] = input[j], input[i]
+	}
+	return input
 }

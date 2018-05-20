@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/RaghavSood/bitpeers"
-	"net"
 )
 
 type BitPeersDB bitpeers.PeersDB
@@ -35,44 +34,11 @@ func (peersDB BitPeersDB) dump() {
 	fmt.Println("")
 	var i uint32
 	for i = 0; i < peersDB.NNew; i++ {
-		fmt.Printf("SerializationVersion: 0x%s\n", hexstring(peersDB.NewAddrInfo[i].SerializationVersion))
-		fmt.Printf("LastSuccess: %d\n", peersDB.NewAddrInfo[i].LastSuccess)
-		fmt.Printf("Attempts: %d\n", peersDB.NewAddrInfo[i].Attempts)
-		fmt.Printf("IPAddress: 0x%s\n", hexstring(peersDB.NewAddrInfo[i].Address.PeerAddress.IPAddress))
-		var parsedIP net.IP
-		parsedIP = peersDB.NewAddrInfo[i].Address.PeerAddress.IPAddress
-		fmt.Printf("Parsed IP: %s\n", parsedIP)
-		fmt.Printf("Port: %d\n", peersDB.NewAddrInfo[i].Address.PeerAddress.Port)
-		fmt.Printf("Source: 0x%s\n", hexstring(peersDB.NewAddrInfo[i].Source))
-		var parsedSourceIP net.IP
-		parsedSourceIP = peersDB.NewAddrInfo[i].Source
-		fmt.Printf("Parsed Source IP: %s\n", parsedSourceIP)
-
-		fmt.Printf("Time: %d\n", peersDB.NewAddrInfo[i].Address.Time)
-		fmt.Printf("ServiceFlags: 0x%s\n", hexstring(peersDB.NewAddrInfo[i].ServiceFlags))
-		fmt.Printf("UnknownBytes: 0x%s\n", hexstring(peersDB.NewAddrInfo[i].UnknownBytes))
-		fmt.Println("")
+		fmt.Print(peersDB.NewAddrInfo[i])
 	}
 	fmt.Println("Tried Addresses:")
-
 	for i = 0; i < peersDB.NTried; i++ {
-		fmt.Printf("SerializationVersion: 0x%s\n", hexstring(peersDB.TriedAddrInfo[i].SerializationVersion))
-		fmt.Printf("LastSuccess: %d\n", peersDB.TriedAddrInfo[i].LastSuccess)
-		fmt.Printf("Attempts: %d\n", peersDB.TriedAddrInfo[i].Attempts)
-		fmt.Printf("IPAddress: 0x%s\n", hexstring(peersDB.TriedAddrInfo[i].Address.PeerAddress.IPAddress))
-		var parsedIP net.IP
-		parsedIP = peersDB.TriedAddrInfo[i].Address.PeerAddress.IPAddress
-		fmt.Printf("Parsed IP: %s\n", parsedIP)
-		fmt.Printf("Port: %d\n", peersDB.TriedAddrInfo[i].Address.PeerAddress.Port)
-		fmt.Printf("Source: 0x%s\n", hexstring(peersDB.TriedAddrInfo[i].Source))
-		var parsedSourceIP net.IP
-		parsedSourceIP = peersDB.TriedAddrInfo[i].Source
-		fmt.Printf("Parsed Source IP: %s\n", parsedSourceIP)
-
-		fmt.Printf("Time: %d\n", peersDB.TriedAddrInfo[i].Address.Time)
-		fmt.Printf("ServiceFlags: 0x%s\n", hexstring(peersDB.TriedAddrInfo[i].ServiceFlags))
-		fmt.Printf("UnknownBytes: 0x%s\n", hexstring(peersDB.TriedAddrInfo[i].UnknownBytes))
-		fmt.Println("")
+		fmt.Print(peersDB.TriedAddrInfo[i])
 	}
 }
 
